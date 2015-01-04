@@ -1,0 +1,4 @@
+BufferedStreamReader
+====================
+
+Delphi BufferedStreamReader
