@@ -11,16 +11,16 @@
 //   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
-unit BufferedStreamReader;
+unit BufStreamReader;
 
 interface
 
 uses
-  System.SysUtils, System.Classes, BufferedStream;
+  System.SysUtils, System.Classes, BufStream;
 
 type
-  TBufferedStreamReaderOption = (BufferedStreamReaderOwnsSource);
-  TBufferedStreamReaderOptions = set of TBufferedStreamReaderOption;
+  BufferedStreamReaderOption = (BufferedStreamReaderOwnsSource);
+  BufferedStreamReaderOptions = set of BufferedStreamReaderOption;
 
   /// <summary>
   ///  <para>
@@ -32,16 +32,16 @@ type
   ///  the underlying source stream. Failure to do so will result in pain.
   ///  </para>
   ///  <para>
-  ///  The reader relies on the TBufferedStream for parsing.
-  ///  If the source stream is not a TBufferedStream the source will be
-  ///  automatically wrapped by a TBufferedStream instance.
+  ///  The reader relies on the BufferedStream for parsing.
+  ///  If the source stream is not a BufferedStream the source will be
+  ///  automatically wrapped by a BufferedStream instance.
   ///  </para>
   ///  </remarks>
   /// </summary>
-  TBufferedStreamReader = class
+  BufferedStreamReader = class
   strict private
     FOwnsSourceStream: boolean;
-    FBufferedStream: TBufferedStream;
+    FBufferedStream: BufferedStream;
     FEncoding: TEncoding;
     FEndOfStream: boolean;
 
@@ -56,7 +56,7 @@ type
     ///  Creates a bufferd stream reader instance.
     /// </summary>
     /// <param name="SourceStream">
-    ///  Stream to read text from. If the SourceStream is not a TBufferedStream
+    ///  Stream to read text from. If the SourceStream is not a BufferedStream
     ///  it will be wrapped, in which case you should use the Stream property
     ///  if you need to read additional data after reading some text.
     /// </param>
@@ -65,7 +65,7 @@ type
     /// </param>
     constructor Create(const SourceStream: TStream;
       const Encoding: TEncoding;
-      const Options: TBufferedStreamReaderOptions = []);
+      const Options: BufferedStreamReaderOptions = []);
     destructor Destroy; override;
 
     /// <summary>
@@ -147,18 +147,18 @@ type
 
 implementation
 
-{ TBufferedStreamReader }
+{ BufferedStreamReader }
 
-constructor TBufferedStreamReader.Create(const SourceStream: TStream;
-  const Encoding: TEncoding; const Options: TBufferedStreamReaderOptions);
+constructor BufferedStreamReader.Create(const SourceStream: TStream;
+  const Encoding: TEncoding; const Options: BufferedStreamReaderOptions);
 var
-  opts: TBufferedStreamOptions;
+  opts: BufferedStreamOptions;
 begin
   inherited Create;
 
-  if (SourceStream is TBufferedStream) then
+  if (SourceStream is BufferedStream) then
   begin
-    FBufferedStream := TBufferedStream(SourceStream);
+    FBufferedStream := BufferedStream(SourceStream);
     FOwnsSourceStream := BufferedStreamReaderOwnsSource in Options;
   end
   else
@@ -168,13 +168,13 @@ begin
     if (BufferedStreamReaderOwnsSource in Options) then
       Include(opts, BufferedStreamOwnsSource);
 
-    FBufferedStream := TBufferedStream.Create(SourceStream, opts);
+    FBufferedStream := BufferedStream.Create(SourceStream, opts);
   end;
 
   FEncoding := Encoding;
 end;
 
-destructor TBufferedStreamReader.Destroy;
+destructor BufferedStreamReader.Destroy;
 begin
   if (FOwnsSourceStream) then
     FBufferedStream.Free;
@@ -184,22 +184,22 @@ begin
   inherited;
 end;
 
-procedure TBufferedStreamReader.FillBufferedData;
+procedure BufferedStreamReader.FillBufferedData;
 begin
   FEndOfStream := not FBufferedStream.FillBuffer;
 end;
 
-function TBufferedStreamReader.GetBufferedData: TBytes;
+function BufferedStreamReader.GetBufferedData: TBytes;
 begin
   result := FBufferedStream.BufferedData;
 end;
 
-function TBufferedStreamReader.GetStream: TStream;
+function BufferedStreamReader.GetStream: TStream;
 begin
   result := FBufferedStream;
 end;
 
-function TBufferedStreamReader.ReadChars(const CharCount: integer): TCharArray;
+function BufferedStreamReader.ReadChars(const CharCount: integer): TCharArray;
 var
   curIndex, charIndex, curCharLen, outputCharCount: integer;
   maxCharLength: integer;
@@ -221,9 +221,9 @@ begin
 
   maxCharLength := Encoding.GetMaxByteCount(1);
 
-  curCharLen := 0;
   curIndex := 0;
   charIndex := 0;
+  outputCharCount := 0;
   while True do
   begin
     if (curIndex + 1 > Length(BufferedData)) and (not FEndOfStream) then
@@ -263,7 +263,7 @@ begin
   result := Encoding.GetChars(BufferedData, 0, charIndex);
 end;
 
-function TBufferedStreamReader.ReadLine: string;
+function BufferedStreamReader.ReadLine: string;
 var
   curIndex, postLineBreakIndex: integer;
 begin
@@ -306,7 +306,7 @@ begin
   FBufferedStream.ConsumeBuffer(postLineBreakIndex);
 end;
 
-function TBufferedStreamReader.ReadToEnd: string;
+function BufferedStreamReader.ReadToEnd: string;
 begin
   FEndOfStream := False;
 
@@ -320,7 +320,7 @@ begin
   FBufferedStream.ConsumeBuffer(Length(BufferedData));
 end;
 
-function TBufferedStreamReader.ReadUntil(const Delimiter: string): string;
+function BufferedStreamReader.ReadUntil(const Delimiter: string): string;
 var
   encodedDelimiter: TBytes;
   curIndex, matchIndex, postDelimiterIndex: integer;
@@ -377,7 +377,7 @@ begin
   FBufferedStream.ConsumeBuffer(postDelimiterIndex);
 end;
 
-function TBufferedStreamReader.ReadUntil(const Delimiter: UInt8): string;
+function BufferedStreamReader.ReadUntil(const Delimiter: UInt8): string;
 var
   curIndex, postDelimiterIndex: integer;
 begin

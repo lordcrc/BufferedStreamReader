@@ -8,8 +8,8 @@ uses
   WinAPI.Windows,
   System.SysUtils,
   System.Classes,
-  BufferedStream in 'BufferedStream.pas',
-  BufferedStreamReader in 'BufferedStreamReader.pas';
+  BufStream in 'BufStream.pas',
+  BufStreamReader in 'BufStreamReader.pas';
 
 function GetData: TBytes;
 begin
@@ -22,14 +22,14 @@ end;
 procedure RunTest1;
 var
   ss: TBytesStream;
-  bs: TBufferedStream;
+  bs: BufferedStream;
   data: array[0..9] of UInt8;
 begin
   ss := nil;
   bs := nil;
   try
     ss := TBytesStream.Create(GetData());
-    bs := TBufferedStream.Create(ss, [], 3);
+    bs := BufferedStream.Create(ss, [], 3);
 
     bs.FillBuffer;
     WriteLn('Source position: ', ss.Position);
@@ -55,14 +55,14 @@ end;
 procedure RunTest2;
 var
   ss: TBytesStream;
-  sr: TBufferedStreamReader;
+  sr: BufferedStreamReader;
   s: string;
 begin
   ss := nil;
   sr := nil;
   try
     ss := TBytesStream.Create(GetData());
-    sr := TBufferedStreamReader.Create(ss, TEncoding.UTF8);
+    sr := BufferedStreamReader.Create(ss, TEncoding.UTF8);
 
     s := sr.ReadLine;
     WriteLn('Line data: "' + s + '"');
@@ -91,14 +91,13 @@ end;
 procedure RunTest3;
 var
   ss: TBytesStream;
-  sr: TBufferedStreamReader;
+  sr: BufferedStreamReader;
   s: string;
 begin
-  ss := nil;
   sr := nil;
   try
     ss := TBytesStream.Create(GetData());
-    sr := TBufferedStreamReader.Create(ss, TEncoding.UTF8, [BufferedStreamReaderOwnsSource]);
+    sr := BufferedStreamReader.Create(ss, TEncoding.UTF8, [BufferedStreamReaderOwnsSource]);
 
     s := sr.ReadUntil(' т');
     WriteLn('Line data: "' + s + '"');
@@ -132,15 +131,14 @@ end;
 procedure RunTest4;
 var
   ss: TBytesStream;
-  sr: TBufferedStreamReader;
+  sr: BufferedStreamReader;
   c: TCharArray;
   s: string;
 begin
-  ss := nil;
   sr := nil;
   try
     ss := TBytesStream.Create(GetData());
-    sr := TBufferedStreamReader.Create(ss, TEncoding.UTF8, [BufferedStreamReaderOwnsSource]);
+    sr := BufferedStreamReader.Create(ss, TEncoding.UTF8, [BufferedStreamReaderOwnsSource]);
 
     sr.ReadLine;
 

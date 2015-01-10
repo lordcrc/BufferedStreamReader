@@ -11,7 +11,7 @@
 //   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
-unit BufferedStream;
+unit BufStream;
 
 interface
 
@@ -19,8 +19,8 @@ uses
   System.SysUtils, System.Classes;
 
 type
-  TBufferedStreamOption = (BufferedStreamOwnsSource);
-  TBufferedStreamOptions = set of TBufferedStreamOption;
+  BufferedStreamOption = (BufferedStreamOwnsSource);
+  BufferedStreamOptions = set of BufferedStreamOption;
 
   /// <summary>
   ///  Provides a read-only buffered stream, where the buffer can be accessed.
@@ -31,7 +31,7 @@ type
   ///  passing the remaining data to other code for processing.
   ///  </para>
   /// </summary>
-  TBufferedStream = class(TStream)
+  BufferedStream = class(TStream)
   strict private
     FSourceStream: TStream;
     FOwnsSourceStream: boolean;
@@ -58,7 +58,7 @@ type
     ///  Number of bytes read per call to FillBuffer.
     /// </param>
     constructor Create(const SourceStream: TStream;
-      const Options: TBufferedStreamOptions = [];
+      const Options: BufferedStreamOptions = [];
       const BufferChunkSize: integer = 4096);
     destructor Destroy; override;
 
@@ -120,9 +120,9 @@ uses
 
 {$POINTERMATH ON}
   
-{ TBufferedStream }
+{ BufferedStream }
 
-procedure TBufferedStream.ConsumeBuffer(const Size: integer);
+procedure BufferedStream.ConsumeBuffer(const Size: integer);
 begin
   if (Size >= Length(FBufferedData)) then
   begin
@@ -137,8 +137,8 @@ begin
   end;
 end;
 
-constructor TBufferedStream.Create(const SourceStream: TStream;
-  const Options: TBufferedStreamOptions;
+constructor BufferedStream.Create(const SourceStream: TStream;
+  const Options: BufferedStreamOptions;
   const BufferChunkSize: integer);
 begin
   inherited Create;
@@ -151,7 +151,7 @@ begin
     FBufferChunkSize := BufferChunkSize;
 end;
 
-destructor TBufferedStream.Destroy;
+destructor BufferedStream.Destroy;
 begin
   if OwnsSourceStream then
   begin
@@ -163,13 +163,13 @@ begin
   inherited;
 end;
 
-procedure TBufferedStream.DiscardBuffer;
+procedure BufferedStream.DiscardBuffer;
 begin
   FBufferedData := nil;
   FPosition := SourceStream.Position;
 end;
 
-function TBufferedStream.FillBuffer: boolean;
+function BufferedStream.FillBuffer: boolean;
 var
   i, len: integer;
 begin
@@ -190,12 +190,12 @@ begin
   end;
 end;
 
-function TBufferedStream.GetSize: Int64;
+function BufferedStream.GetSize: Int64;
 begin
   result := SourceStream.Size;
 end;
 
-function TBufferedStream.Read(var Buffer; Count: Integer): Longint;
+function BufferedStream.Read(var Buffer; Count: Integer): Longint;
 var
   len: integer;
   endOfSource: boolean;
@@ -231,12 +231,12 @@ begin
   result := result + len;
 end;
 
-procedure TBufferedStream.SetSize(NewSize: Integer);
+procedure BufferedStream.SetSize(NewSize: Integer);
 begin
   SetSize(Int64(NewSize));
 end;
 
-function TBufferedStream.Seek(const Offset: Int64; Origin: TSeekOrigin): Int64;
+function BufferedStream.Seek(const Offset: Int64; Origin: TSeekOrigin): Int64;
 begin
   if not ((Origin = soCurrent) and (Offset = 0)) then
   begin
@@ -248,7 +248,7 @@ begin
   result := FPosition;
 end;
 
-procedure TBufferedStream.SetSize(const NewSize: Int64);
+procedure BufferedStream.SetSize(const NewSize: Int64);
 var
   oldSize: Int64;
 begin
@@ -258,7 +258,7 @@ begin
     DiscardBuffer;
 end;
 
-function TBufferedStream.Write(const Buffer; Count: Integer): Longint;
+function BufferedStream.Write(const Buffer; Count: Integer): Longint;
 begin
   raise ENotSupportedException.Create('TBufferedStream does not support writing');
 end;
