@@ -129,15 +129,51 @@ begin
   end;
 end;
 
+procedure RunTest4;
+var
+  ss: TBytesStream;
+  sr: TBufferedStreamReader;
+  c: TCharArray;
+  s: string;
+begin
+  ss := nil;
+  sr := nil;
+  try
+    ss := TBytesStream.Create(GetData());
+    sr := TBufferedStreamReader.Create(ss, TEncoding.UTF8, [BufferedStreamReaderOwnsSource]);
+
+    sr.ReadLine;
+
+    c := sr.ReadChars(1);
+    SetString(s, PChar(@c[0]), Length(c));
+    WriteLn('Line data: "' + s + '"');
+    WriteLn('Source position: ', ss.Position);
+    WriteLn('Buffer position: ', sr.Stream.Position);
+    WriteLn;
+
+    c := sr.ReadChars(2);
+    SetString(s, PChar(@c[0]), Length(c));
+    WriteLn('Line data: "' + s + '"');
+    WriteLn('Source position: ', ss.Position);
+    WriteLn('Buffer position: ', sr.Stream.Position);
+    WriteLn;
+    WriteLn;
+  finally
+    sr.Free;
+  end;
+end;
+
 begin
   try
     SetConsoleOutputCP(CP_UTF8);
 
-    RunTest1;
+//    RunTest1;
+//
+//    RunTest2;
+//
+//    RunTest3;
 
-    RunTest2;
-
-    RunTest3;
+    RunTest4;
   except
     on E: Exception do
       Writeln(E.ClassName, ': ', E.Message);

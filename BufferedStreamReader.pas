@@ -45,6 +45,8 @@ type
     FEncoding: TEncoding;
     FEndOfStream: boolean;
 
+    procedure FillBufferedData;
+
     function GetStream: TStream; inline;
     function GetBufferedData: TBytes; inline;
 
@@ -66,6 +68,13 @@ type
       const Options: TBufferedStreamReaderOptions = []);
     destructor Destroy; override;
 
+    /// <summary>
+    ///  <para>
+    ///  Reads up to Count characters from the source stream. Returns an empty
+    ///  array if there's an error decoding the characters.
+    ///  </para>
+    /// </summary>
+    function ReadChars(const CharCount: integer): TCharArray;
 
     /// <summary>
     ///  <para>
@@ -115,7 +124,12 @@ type
     /// </summary>
     function ReadToEnd: string;
 
-    property Encoding: TEncoding read FEncoding;
+    /// <summary>
+    ///  <para>
+    ///  Encoding of the text to be read.
+    ///  </para>
+    /// </summary>
+    property Encoding: TEncoding read FEncoding write FEncoding;
 
     /// <summary>
     ///  The buffered stream. Use this if you need to read aditional
@@ -170,6 +184,11 @@ begin
   inherited;
 end;
 
+procedure TBufferedStreamReader.FillBufferedData;
+begin
+  FEndOfStream := not FBufferedStream.FillBuffer;
+end;
+
 function TBufferedStreamReader.GetBufferedData: TBytes;
 begin
   result := FBufferedStream.BufferedData;
@@ -178,6 +197,70 @@ end;
 function TBufferedStreamReader.GetStream: TStream;
 begin
   result := FBufferedStream;
+end;
+
+function TBufferedStreamReader.ReadChars(const CharCount: integer): TCharArray;
+var
+  curIndex, charIndex, curCharLen, outputCharCount: integer;
+  maxCharLength: integer;
+  gotChar: boolean;
+begin
+  result := nil;
+
+  FEndOfStream := False;
+
+  if (Encoding.IsSingleByte) then
+  begin
+    while (Length(BufferedData) < CharCount) and (not FEndOfStream) do
+    begin
+      FillBufferedData;
+    end;
+    result := Encoding.GetChars(BufferedData, 0, CharCount);
+    exit;
+  end;
+
+  maxCharLength := Encoding.GetMaxByteCount(1);
+
+  curCharLen := 0;
+  curIndex := 0;
+  charIndex := 0;
+  while True do
+  begin
+    if (curIndex + 1 > Length(BufferedData)) and (not FEndOfStream) then
+      FillBufferedData;
+
+    if (curIndex >= Length(BufferedData)) then
+    begin
+      curIndex := Length(BufferedData);
+      charIndex := curIndex;
+      break;
+    end;
+
+    curCharLen := curIndex - charIndex + 1;
+    gotChar := Encoding.GetCharCount(BufferedData, charIndex, curCharLen) > 0;
+
+    if (gotChar) then
+    begin
+      charIndex := curIndex + 1;
+      outputCharCount := outputCharCount + 1;
+    end
+    else if (curCharLen >= maxCharLength) then
+    begin
+      // something is wrong
+      // buffer start is probably in the middle of a character or similar
+      exit;
+    end;
+
+    if (outputCharCount >= CharCount) then
+      break;
+
+    curIndex := curIndex + 1;
+  end;
+
+  if (charIndex = 0) then
+    exit;
+
+  result := Encoding.GetChars(BufferedData, 0, charIndex);
 end;
 
 function TBufferedStreamReader.ReadLine: string;
@@ -192,7 +275,7 @@ begin
   while True do
   begin
     if (curIndex + 2 > Length(BufferedData)) and (not FEndOfStream) then
-      FEndOfStream := not FBufferedStream.FillBuffer;
+      FillBufferedData;
 
     if (curIndex >= Length(BufferedData)) then
     begin
@@ -229,7 +312,7 @@ begin
 
   while (not FEndOfStream) do
   begin
-    FEndOfStream := not FBufferedStream.FillBuffer;
+    FillBufferedData;
   end;
 
   result := Encoding.GetString(BufferedData, 0, Length(BufferedData));
@@ -260,7 +343,7 @@ begin
   while True do
   begin
     if (curIndex + 1 > Length(BufferedData)) and (not FEndOfStream) then
-      FEndOfStream := not FBufferedStream.FillBuffer;
+      FillBufferedData;
 
     if (curIndex >= Length(BufferedData)) then
     begin
@@ -306,7 +389,7 @@ begin
   while True do
   begin
     if (curIndex + 1 > Length(BufferedData)) and (not FEndOfStream) then
-      FEndOfStream := not FBufferedStream.FillBuffer;
+      FillBufferedData;
 
     if (curIndex >= Length(BufferedData)) then
     begin
