@@ -22,18 +22,6 @@ type
   BufferedStreamOption = (BufferedStreamOwnsSource);
   BufferedStreamOptions = set of BufferedStreamOption;
 
-  ByteArrayView = record
-  private
-    FPtr: PByte;
-    FLength: integer;
-    function GetElement(const Index: integer): Byte; inline;
-    procedure SetElement(const Index: integer; const Value: Byte); inline;
-  public
-    property Ptr: PByte read FPtr;
-    property Length: integer read FLength;
-    property Element[const Index: integer]: Byte read GetElement write SetElement; default;
-  end;
-
   /// <summary>
   ///  Provides a read-only buffered stream, where the buffer can be accessed.
   ///  <para>
@@ -137,30 +125,6 @@ uses
   System.Math;
 
 {$POINTERMATH ON}
-
-{ ByteArrayView }
-
-procedure MakeByteArrayView(const Ptr: PByte; const Offset, Length: integer; var View: ByteArrayView); inline;
-begin
-  View.FPtr := Ptr + Offset;
-  View.FLength := Length;
-end;
-
-//class function ByteArrayView.Create(const Ptr: PByte; const Length: integer): ByteArrayView;
-//begin
-//  result.FPtr := Ptr;
-//  result.FLength := Length;
-//end;
-
-function ByteArrayView.GetElement(const Index: integer): Byte;
-begin
-  result := (FPtr + Index)^;
-end;
-
-procedure ByteArrayView.SetElement(const Index: integer; const Value: Byte);
-begin
-  (FPtr + Index)^ := Value;
-end;
 
 { BufferedStream }
 
