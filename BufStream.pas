@@ -22,6 +22,18 @@ type
   BufferedStreamOption = (BufferedStreamOwnsSource);
   BufferedStreamOptions = set of BufferedStreamOption;
 
+  ByteArrayView = record
+  private
+    FPtr: PByte;
+    FLength: integer;
+    function GetElement(const Index: integer): Byte; inline;
+    procedure SetElement(const Index: integer; const Value: Byte); inline;
+  public
+    property Ptr: PByte read FPtr;
+    property Length: integer read FLength;
+    property Element[const Index: integer]: Byte read GetElement write SetElement; default;
+  end;
+
   /// <summary>
   ///  Provides a read-only buffered stream, where the buffer can be accessed.
   ///  <para>
@@ -36,8 +48,13 @@ type
     FSourceStream: TStream;
     FOwnsSourceStream: boolean;
     FBufferChunkSize: integer;
+    FBufferFrontIndex: integer;
     FBufferedData: TBytes;
+    FBufferedDataLength: integer;
     FPosition: Int64;
+
+    procedure ClearBuffer;
+    function GetBufferedData: PByte; inline;
   protected
     {$REGION 'TStream overrides'}
     function GetSize: Int64; override;
@@ -110,7 +127,8 @@ type
     ///  to remove data from the start of the buffer and update the
     ///  stream position.
     /// </summary>
-    property BufferedData: TBytes read FBufferedData;
+    property BufferedData: PByte read GetBufferedData;
+    property BufferedDataLength: integer read FBufferedDataLength;
   end;
 
 implementation
@@ -119,21 +137,63 @@ uses
   System.Math;
 
 {$POINTERMATH ON}
-  
+
+{ ByteArrayView }
+
+procedure MakeByteArrayView(const Ptr: PByte; const Offset, Length: integer; var View: ByteArrayView); inline;
+begin
+  View.FPtr := Ptr + Offset;
+  View.FLength := Length;
+end;
+
+//class function ByteArrayView.Create(const Ptr: PByte; const Length: integer): ByteArrayView;
+//begin
+//  result.FPtr := Ptr;
+//  result.FLength := Length;
+//end;
+
+function ByteArrayView.GetElement(const Index: integer): Byte;
+begin
+  result := (FPtr + Index)^;
+end;
+
+procedure ByteArrayView.SetElement(const Index: integer; const Value: Byte);
+begin
+  (FPtr + Index)^ := Value;
+end;
+
 { BufferedStream }
+
+procedure BufferedStream.ClearBuffer;
+begin
+  FBufferFrontIndex := 0;
+  FBufferedDataLength := 0;
+  FBufferedData := nil;
+end;
 
 procedure BufferedStream.ConsumeBuffer(const Size: integer);
 begin
-  if (Size >= Length(FBufferedData)) then
+  if (Size >= FBufferedDataLength) then
   begin
-    FPosition := FPosition + Length(FBufferedData);
-    FBufferedData := nil;
+    FPosition := FPosition + FBufferedDataLength;
+    ClearBuffer;
+  end
+  else if (FBufferFrontIndex + Size >= FBufferChunkSize) then
+  begin
+    // we've got a full chunk of unused space in front of the buffer
+    // move this
+    FPosition := FPosition + Size;
+    Move(FBufferedData[FBufferFrontIndex + Size], FBufferedData[0], FBufferedDataLength - Size);
+    FBufferFrontIndex := 0;
+    FBufferedDataLength := FBufferedDataLength - Size;
+    SetLength(FBufferedData, FBufferedDataLength);
   end
   else
   begin
+    // just advance front index
     FPosition := FPosition + Size;
-    Move(FBufferedData[Size], FBufferedData[0], Length(FBufferedData) - Size);
-    SetLength(FBufferedData, Length(FBufferedData) - Size);
+    FBufferFrontIndex := FBufferFrontIndex + Size;
+    FBufferedDataLength := FBufferedDataLength - Size;
   end;
 end;
 
@@ -182,12 +242,18 @@ begin
 
   result := True;
 
+  FBufferedDataLength := FBufferedDataLength + len;
   if (len < FBufferChunkSize) then
   begin
     // reduce size of buffer to reflect read data amount
     SetLength(FBufferedData, i + len);
     result := False;
   end;
+end;
+
+function BufferedStream.GetBufferedData: PByte;
+begin
+  result := @FBufferedData[FBufferFrontIndex];
 end;
 
 function BufferedStream.GetSize: Int64;
@@ -204,12 +270,12 @@ begin
   endOfSource := False;  
 
   // try using buffer with possibly an additional chunk first
-  if (Count > Length(FBufferedData)) and (Count <= (Length(FBufferedData) + FBufferChunkSize)) then
+  if (Count > FBufferedDataLength) and (Count <= (FBufferedDataLength + FBufferChunkSize)) then
     endOfSource := not FillBuffer();
 
-  len := Min(Length(FBufferedData), Count);
+  len := Min(FBufferedDataLength, Count);
     
-  Move(FBufferedData[0], Buffer, len);
+  Move(FBufferedData[FBufferFrontIndex], Buffer, len);
   ConsumeBuffer(len);
 
   if (len = Count) or (endOfSource) then
@@ -241,7 +307,7 @@ begin
   if not ((Origin = soCurrent) and (Offset = 0)) then
   begin
     // TODO - more intelligent handling of buffer
-    FBufferedData := nil;
+    ClearBuffer;
     FPosition := SourceStream.Seek(Offset, Origin);
   end;
 

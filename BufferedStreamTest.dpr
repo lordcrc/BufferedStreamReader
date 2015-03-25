@@ -9,7 +9,8 @@ uses
   System.SysUtils,
   System.Classes,
   BufStream in 'BufStream.pas',
-  BufStreamReader in 'BufStreamReader.pas';
+  BufStreamReader in 'BufStreamReader.pas',
+  EncodingHelper in 'EncodingHelper.pas';
 
 function GetData: TBytes;
 begin

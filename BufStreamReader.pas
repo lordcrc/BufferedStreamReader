@@ -48,9 +48,11 @@ type
     procedure FillBufferedData;
 
     function GetStream: TStream; inline;
-    function GetBufferedData: TBytes; inline;
+    function GetBufferedData: PByte; inline;
+    function GetBufferedDataLength: integer; inline;
 
-    property BufferedData: TBytes read GetBufferedData;
+    property BufferedData: PByte read GetBufferedData;
+    property BufferedDataLength: integer read GetBufferedDataLength;
   public
     /// <summary>
     ///  Creates a bufferd stream reader instance.
@@ -147,6 +149,9 @@ type
 
 implementation
 
+uses
+  EncodingHelper;
+
 { BufferedStreamReader }
 
 constructor BufferedStreamReader.Create(const SourceStream: TStream;
@@ -189,9 +194,14 @@ begin
   FEndOfStream := not FBufferedStream.FillBuffer;
 end;
 
-function BufferedStreamReader.GetBufferedData: TBytes;
+function BufferedStreamReader.GetBufferedData: PByte;
 begin
   result := FBufferedStream.BufferedData;
+end;
+
+function BufferedStreamReader.GetBufferedDataLength: integer;
+begin
+  result := FBufferedStream.BufferedDataLength;
 end;
 
 function BufferedStreamReader.GetStream: TStream;
@@ -211,7 +221,7 @@ begin
 
   if (Encoding.IsSingleByte) then
   begin
-    while (Length(BufferedData) < CharCount) and (not FEndOfStream) do
+    while (BufferedDataLength < CharCount) and (not FEndOfStream) do
     begin
       FillBufferedData;
     end;
@@ -226,12 +236,12 @@ begin
   outputCharCount := 0;
   while True do
   begin
-    if (curIndex + 1 > Length(BufferedData)) and (not FEndOfStream) then
+    if (curIndex + 1 > BufferedDataLength) and (not FEndOfStream) then
       FillBufferedData;
 
-    if (curIndex >= Length(BufferedData)) then
+    if (curIndex >= BufferedDataLength) then
     begin
-      curIndex := Length(BufferedData);
+      curIndex := BufferedDataLength;
       charIndex := curIndex;
       break;
     end;
@@ -274,12 +284,12 @@ begin
 
   while True do
   begin
-    if (curIndex + 2 > Length(BufferedData)) and (not FEndOfStream) then
+    if (curIndex + 2 > BufferedDataLength) and (not FEndOfStream) then
       FillBufferedData;
 
-    if (curIndex >= Length(BufferedData)) then
+    if (curIndex >= BufferedDataLength) then
     begin
-      curIndex := Length(BufferedData);
+      curIndex := BufferedDataLength;
       postLineBreakIndex := curIndex;
       break;
     end;
@@ -291,7 +301,7 @@ begin
     end
     else if (BufferedData[curIndex] = 13) then
     begin
-      if (curIndex + 1 < Length(BufferedData)) and (BufferedData[curIndex+1] = 10) then
+      if (curIndex + 1 < BufferedDataLength) and (BufferedData[curIndex+1] = 10) then
         postLineBreakIndex := curIndex + 2
       else
         postLineBreakIndex := curIndex + 1;
@@ -315,9 +325,9 @@ begin
     FillBufferedData;
   end;
 
-  result := Encoding.GetString(BufferedData, 0, Length(BufferedData));
+  result := Encoding.GetString(BufferedData, 0, BufferedDataLength);
 
-  FBufferedStream.ConsumeBuffer(Length(BufferedData));
+  FBufferedStream.ConsumeBuffer(BufferedDataLength);
 end;
 
 function BufferedStreamReader.ReadUntil(const Delimiter: string): string;
@@ -342,12 +352,12 @@ begin
   // TODO - perhaps some better algorithm than the naive scan
   while True do
   begin
-    if (curIndex + 1 > Length(BufferedData)) and (not FEndOfStream) then
+    if (curIndex + 1 > BufferedDataLength) and (not FEndOfStream) then
       FillBufferedData;
 
-    if (curIndex >= Length(BufferedData)) then
+    if (curIndex >= BufferedDataLength) then
     begin
-      curIndex := Length(BufferedData);
+      curIndex := BufferedDataLength;
       postDelimiterIndex := curIndex;
       break;
     end;
@@ -388,12 +398,12 @@ begin
 
   while True do
   begin
-    if (curIndex + 1 > Length(BufferedData)) and (not FEndOfStream) then
+    if (curIndex + 1 > BufferedDataLength) and (not FEndOfStream) then
       FillBufferedData;
 
-    if (curIndex >= Length(BufferedData)) then
+    if (curIndex >= BufferedDataLength) then
     begin
-      curIndex := Length(BufferedData);
+      curIndex := BufferedDataLength;
       postDelimiterIndex := curIndex;
       break;
     end;
