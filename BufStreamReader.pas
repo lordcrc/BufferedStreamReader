@@ -192,6 +192,7 @@ end;
 procedure BufferedStreamReader.FillBufferedData;
 begin
   FEndOfStream := not FBufferedStream.FillBuffer;
+  FEndOfStream := FEndOfStream and (BufferedDataLength <= 0);
 end;
 
 function BufferedStreamReader.GetBufferedData: PByte;
