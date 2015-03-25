@@ -109,13 +109,18 @@ type
     property OwnsSourceStream: boolean read FOwnsSourceStream;
 
     /// <summary>
-    ///  The currently buffered data. Note that modifying data in the buffer
+    ///  Pointer to the currently buffered data.
+    ///  Use BufferedDataLength to determine the amount of buffered data.
+    ///  Note that modifying data in the buffer
     ///  is not propagated to the underlying source stream.
     ///  Use FillBuffer to append more data to the buffer, and ConsumeBuffer
     ///  to remove data from the start of the buffer and update the
     ///  stream position.
     /// </summary>
     property BufferedData: PByte read GetBufferedData;
+    /// <summary>
+    ///  The size of the buffered data, in bytes.
+    /// </summary>
     property BufferedDataLength: integer read FBufferedDataLength;
   end;
 
