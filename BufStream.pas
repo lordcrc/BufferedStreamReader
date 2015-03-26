@@ -272,14 +272,28 @@ begin
 end;
 
 function BufferedStream.Seek(const Offset: Int64; Origin: TSeekOrigin): Int64;
+var
+  sourceOffset: Int64;
 begin
-  if not ((Origin = soCurrent) and (Offset = 0)) then
+  if (Origin = soCurrent) and (Offset = 0) then
   begin
-    // TODO - more intelligent handling of buffer
-    ClearBuffer;
-    FPosition := SourceStream.Seek(Offset, Origin);
+    result := FPosition;
+    exit;
   end;
 
+  // TODO - more intelligent handling of buffer
+  ClearBuffer;
+
+  if (Origin = soCurrent) then
+  begin
+    sourceOffset := FPosition + Offset - SourceStream.Position;
+  end
+  else
+  begin
+    sourceOffset := Offset;
+  end;
+
+  FPosition := SourceStream.Seek(sourceOffset, Origin);
   result := FPosition;
 end;
 
