@@ -90,6 +90,9 @@
         <DCCReference Include="TestBufStream.pas"/>
         <DCCReference Include="..\BufStream.pas"/>
         <DCCReference Include="CustomTestCase.pas"/>
+        <DCCReference Include="TestBufStreamReader.pas"/>
+        <DCCReference Include="..\BufStreamReader.pas"/>
+        <DCCReference Include="..\EncodingHelper.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

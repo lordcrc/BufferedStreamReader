@@ -20,7 +20,10 @@ uses
   DUnitTestRunner,
   TestBufStream in 'TestBufStream.pas',
   BufStream in '..\BufStream.pas',
-  CustomTestCase in 'CustomTestCase.pas';
+  CustomTestCase in 'CustomTestCase.pas',
+  TestBufStreamReader in 'TestBufStreamReader.pas',
+  BufStreamReader in '..\BufStreamReader.pas',
+  EncodingHelper in '..\EncodingHelper.pas';
 
 {$R *.RES}
 
