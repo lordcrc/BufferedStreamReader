@@ -4,7 +4,7 @@ BufferedStreamReader
 A simple, buffered TStreamReader replacement for Delphi. 
 
 Unlike the TStreamReader in the RTL, it can be used to process any remaining 
-data after reading some text. Due to the TBufferedStream it is also 
+data after reading some text. Due to the BufferedStream it is also 
 significantly faster than TStreamReader, especially for doing many small reads
 with large buffer sizes (>16KB).
 
