@@ -3,7 +3,7 @@
         <ProjectGuid>{7ACB9402-0FB3-40AC-9DDE-258F5D48DCCA}</ProjectGuid>
         <ProjectVersion>16.1</ProjectVersion>
         <FrameworkType>None</FrameworkType>
-        <MainSource>BufferedStreamTest.dpr</MainSource>
+        <MainSource>BufferedStreamDev.dpr</MainSource>
         <Base>True</Base>
         <Config Condition="'$(Config)'==''">Release</Config>
         <Platform Condition="'$(Platform)'==''">Win32</Platform>
@@ -47,7 +47,7 @@
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base)'!=''">
         <DCC_Define>TESTINSIGHT;$(DCC_Define)</DCC_Define>
-        <SanitizedProjectName>BufferedStreamTest</SanitizedProjectName>
+        <SanitizedProjectName>BufferedStreamDev</SanitizedProjectName>
         <DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;$(DCC_Namespace)</DCC_Namespace>
         <DCC_DcuOutput>.\$(Platform)\$(Config)</DCC_DcuOutput>
         <DCC_ExeOutput>.\$(Platform)\$(Config)</DCC_ExeOutput>
@@ -124,7 +124,7 @@
         <BorlandProject>
             <Delphi.Personality>
                 <Source>
-                    <Source Name="MainSource">BufferedStreamTest.dpr</Source>
+                    <Source Name="MainSource">BufferedStreamDev.dpr</Source>
                 </Source>
                 <Excluded_Packages>
                     <Excluded_Packages Name="$(BDSBIN)\dcloffice2k210.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
@@ -132,9 +132,9 @@
                 </Excluded_Packages>
             </Delphi.Personality>
             <Deployment>
-                <DeployFile LocalName="Win32\Debug\BufferedStreamTest.exe" Configuration="Debug" Class="ProjectOutput">
+                <DeployFile LocalName="Win32\Debug\BufferedStreamDev.exe" Configuration="Debug" Class="ProjectOutput">
                     <Platform Name="Win32">
-                        <RemoteName>BufferedStreamTest.exe</RemoteName>
+                        <RemoteName>BufferedStreamDev.exe</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
@@ -146,9 +146,9 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="Win32\Release\BufferedStreamTest.exe" Configuration="Release" Class="ProjectOutput">
+                <DeployFile LocalName="Win32\Release\BufferedStreamDev.exe" Configuration="Release" Class="ProjectOutput">
                     <Platform Name="Win32">
-                        <RemoteName>BufferedStreamTest.exe</RemoteName>
+                        <RemoteName>BufferedStreamDev.exe</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>

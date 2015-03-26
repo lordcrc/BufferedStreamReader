@@ -3,7 +3,7 @@
         <ProjectGuid>{8BE10795-DB31-425C-B089-5342871A3403}</ProjectGuid>
     </PropertyGroup>
     <ItemGroup>
-        <Projects Include="BufferedStreamTest.dproj">
+        <Projects Include="BufferedStreamDev.dproj">
             <Dependencies/>
         </Projects>
         <Projects Include="Test\BufferedStreamReaderTests.dproj">
@@ -17,14 +17,14 @@
             <Default.Personality/>
         </BorlandProject>
     </ProjectExtensions>
-    <Target Name="BufferedStreamTest">
-        <MSBuild Projects="BufferedStreamTest.dproj"/>
+    <Target Name="BufferedStreamDev">
+        <MSBuild Projects="BufferedStreamDev.dproj"/>
     </Target>
-    <Target Name="BufferedStreamTest:Clean">
-        <MSBuild Projects="BufferedStreamTest.dproj" Targets="Clean"/>
+    <Target Name="BufferedStreamDev:Clean">
+        <MSBuild Projects="BufferedStreamDev.dproj" Targets="Clean"/>
     </Target>
-    <Target Name="BufferedStreamTest:Make">
-        <MSBuild Projects="BufferedStreamTest.dproj" Targets="Make"/>
+    <Target Name="BufferedStreamDev:Make">
+        <MSBuild Projects="BufferedStreamDev.dproj" Targets="Make"/>
     </Target>
     <Target Name="BufferedStreamReaderTests">
         <MSBuild Projects="Test\BufferedStreamReaderTests.dproj"/>
@@ -36,13 +36,13 @@
         <MSBuild Projects="Test\BufferedStreamReaderTests.dproj" Targets="Make"/>
     </Target>
     <Target Name="Build">
-        <CallTarget Targets="BufferedStreamTest;BufferedStreamReaderTests"/>
+        <CallTarget Targets="BufferedStreamDev;BufferedStreamReaderTests"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="BufferedStreamTest:Clean;BufferedStreamReaderTests:Clean"/>
+        <CallTarget Targets="BufferedStreamDev:Clean;BufferedStreamReaderTests:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="BufferedStreamTest:Make;BufferedStreamReaderTests:Make"/>
+        <CallTarget Targets="BufferedStreamDev:Make;BufferedStreamReaderTests:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>

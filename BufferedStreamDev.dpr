@@ -1,4 +1,4 @@
-﻿program BufferedStreamTest;
+﻿program BufferedStreamDev;
 
 {$APPTYPE CONSOLE}
 
