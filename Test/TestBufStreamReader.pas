@@ -31,6 +31,7 @@ type
     procedure TestReadChars;
     procedure TestReadLine;
     procedure TestReadUntilByte;
+    procedure TestReadUntilMultipleBytes;
     procedure TestReadUntilString;
     procedure TestReadToEnd;
     procedure TestReadStreamAfter;
@@ -187,6 +188,50 @@ begin
 
   ReturnValue := FBufferedStreamReader.ReadUntil(Delimiter);
   CheckEquals(#10 + FLine3, ReturnValue);
+  CheckTrue(FBufferedStreamReader.EndOfStream, 'ReadUntil failed to flag end of stream');
+end;
+
+procedure TestBufferedStreamReaderBase.TestReadUntilMultipleBytes;
+var
+  ReturnValue: string;
+  Delimiter: array[0..2] of Byte;
+begin
+  Delimiter[0] := 10;
+  Delimiter[1] := 13;
+  Delimiter[2] := 1;
+  ReturnValue := FBufferedStreamReader.ReadUntil(Delimiter);
+
+  CheckEquals(FLine1, ReturnValue);
+  CheckFalse(FBufferedStreamReader.EndOfStream, 'ReadUntil incorrectly flagged end of stream');
+
+  Delimiter[0] := 10;
+  Delimiter[1] := 2;
+  Delimiter[2] := 1;
+  ReturnValue := FBufferedStreamReader.ReadUntil(Delimiter);
+
+  CheckEquals('', ReturnValue);
+  CheckFalse(FBufferedStreamReader.EndOfStream, 'ReadUntil incorrectly flagged end of stream');
+
+  Delimiter[0] := 10;
+  Delimiter[1] := 2;
+  Delimiter[2] := 1;
+  ReturnValue := FBufferedStreamReader.ReadUntil(Delimiter);
+
+  CheckEquals(FLine2 + #13, ReturnValue);
+  CheckFalse(FBufferedStreamReader.EndOfStream, 'ReadUntil incorrectly flagged end of stream');
+
+  ReturnValue := FBufferedStreamReader.ReadUntil([Ord('5')]);
+
+  CheckEquals(FLine3.Substring(0, 5), ReturnValue);
+  CheckFalse(FBufferedStreamReader.EndOfStream, 'ReadUntil incorrectly flagged end of stream');
+
+  Delimiter[0] := 3;
+  Delimiter[1] := 2;
+  Delimiter[2] := 1;
+
+  ReturnValue := FBufferedStreamReader.ReadUntil(Delimiter);
+
+  CheckEquals(FLine3.Substring(6, 4), ReturnValue);
   CheckTrue(FBufferedStreamReader.EndOfStream, 'ReadUntil failed to flag end of stream');
 end;
 

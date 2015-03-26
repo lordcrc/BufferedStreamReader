@@ -106,6 +106,18 @@ type
 
     /// <summary>
     ///  <para>
+    ///  Reads text from the source stream until one of the delimiters
+    ///  is found or the end of the source stream is reached.
+    ///  </para>
+    ///  <para>
+    ///  If no more data can be read from the source stream, it
+    ///  returns an empty string.
+    ///  </para>
+    /// </summary>
+    function ReadUntil(const Delimiters: array of UInt8): string; overload;
+
+    /// <summary>
+    ///  <para>
     ///  Reads text from the source stream until a text delimiter is found or
     ///  the end of the source stream is reached. The delimiter is encoded using
     ///  the current Encoding, and the encoded delimiter is used for matching.
@@ -367,6 +379,59 @@ begin
   result := Encoding.GetString(BufferedData, 0, BufferedDataLength);
 
   ConsumeBufferedData(BufferedDataLength);
+end;
+
+function BufferedStreamReader.ReadUntil(const Delimiters: array of UInt8): string;
+var
+  curIndex, postDelimiterIndex: integer;
+  di, NumDelims: integer;
+begin
+  NumDelims := Length(Delimiters);
+
+  if (NumDelims = 0) then
+    raise EArgumentException.Create('No delimiter specified in BufferedStreamReader.ReadUnil');
+
+  if (NumDelims = 1) then
+  begin
+    result := ReadUntil(Delimiters[0]);
+    exit;
+  end;
+
+  FEndOfStream := False;
+
+  curIndex := 0;
+  postDelimiterIndex := -1;
+
+  while True do
+  begin
+    if (curIndex + 1 > BufferedDataLength) and (not FEndOfStream) then
+      FillBufferedData;
+
+    if (curIndex >= BufferedDataLength) then
+    begin
+      curIndex := BufferedDataLength;
+      postDelimiterIndex := curIndex;
+      break;
+    end;
+
+    for di := 0 to NumDelims-1 do
+    begin
+      if (BufferedData[curIndex] = Delimiters[di]) then
+      begin
+        postDelimiterIndex := curIndex + 1;
+        break;
+      end;
+    end;
+
+    if (postDelimiterIndex >= 0) then
+      break;
+
+    curIndex := curIndex + 1;
+  end;
+
+  result := Encoding.GetString(BufferedData, 0, curIndex);
+
+  ConsumeBufferedData(postDelimiterIndex);
 end;
 
 function BufferedStreamReader.ReadUntil(const Delimiter: string): string;
