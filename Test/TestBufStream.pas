@@ -109,13 +109,26 @@ begin
   CheckEquals(0, FBufferedStream.BufferedDataLength, 'Seek from beginning failed to reset buffer length');
 
 
+  // FillBuffer will increase source position
   FBufferedStream.FillBuffer;
   Origin := soCurrent;
   Offset := 2;
   ReturnValue := FBufferedStream.Seek(Offset, Origin);
 
-  CheckEquals(3, ReturnValue, 'Seek from current failed');
-  CheckEquals(ReturnValue, FBufferedStream.Position, 'Position wrong after Seek from current');
+  CheckEquals(3, ReturnValue, 'Seek from current with positive offset failed');
+  CheckEquals(ReturnValue, FBufferedStream.Position, 'Position wrong after Seek from current with positive offset');
+  CheckNull(FBufferedStream.BufferedData, 'Seek from current failed to clear buffer data');
+  CheckEquals(0, FBufferedStream.BufferedDataLength, 'Seek from current failed to reset buffer length');
+
+
+  // FillBuffer will increase source position
+  FBufferedStream.FillBuffer;
+  Origin := soCurrent;
+  Offset := -1;
+  ReturnValue := FBufferedStream.Seek(Offset, Origin);
+
+  CheckEquals(2, ReturnValue, 'Seek from current with negative offset failed');
+  CheckEquals(ReturnValue, FBufferedStream.Position, 'Position wrong after Seek from current with negative offset');
   CheckNull(FBufferedStream.BufferedData, 'Seek from current failed to clear buffer data');
   CheckEquals(0, FBufferedStream.BufferedDataLength, 'Seek from current failed to reset buffer length');
 
