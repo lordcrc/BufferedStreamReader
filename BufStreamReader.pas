@@ -43,9 +43,11 @@ type
     FOwnsSourceStream: boolean;
     FBufferedStream: BufferedStream;
     FEncoding: TEncoding;
+    FSourceEndOfStream: boolean;
     FEndOfStream: boolean;
 
     procedure FillBufferedData;
+    procedure ConsumeBufferedData(const Size: integer);
 
     function GetStream: TStream; inline;
     function GetBufferedData: PByte; inline;
@@ -154,6 +156,12 @@ uses
 
 { BufferedStreamReader }
 
+procedure BufferedStreamReader.ConsumeBufferedData(const Size: integer);
+begin
+  FBufferedStream.ConsumeBuffer(Size);
+  FEndOfStream := FSourceEndOfStream and (BufferedDataLength <= 0);
+end;
+
 constructor BufferedStreamReader.Create(const SourceStream: TStream;
   const Encoding: TEncoding; const Options: BufferedStreamReaderOptions);
 var
@@ -191,8 +199,8 @@ end;
 
 procedure BufferedStreamReader.FillBufferedData;
 begin
-  FEndOfStream := not FBufferedStream.FillBuffer;
-  FEndOfStream := FEndOfStream and (BufferedDataLength <= 0);
+  FSourceEndOfStream := not FBufferedStream.FillBuffer;
+  FEndOfStream := FSourceEndOfStream and (BufferedDataLength <= 0);
 end;
 
 function BufferedStreamReader.GetBufferedData: PByte;
@@ -314,21 +322,21 @@ begin
 
   result := Encoding.GetString(BufferedData, 0, curIndex);
 
-  FBufferedStream.ConsumeBuffer(postLineBreakIndex);
+  ConsumeBufferedData(postLineBreakIndex);
 end;
 
 function BufferedStreamReader.ReadToEnd: string;
 begin
   FEndOfStream := False;
 
-  while (not FEndOfStream) do
+  while (not FSourceEndOfStream) do
   begin
     FillBufferedData;
   end;
 
   result := Encoding.GetString(BufferedData, 0, BufferedDataLength);
 
-  FBufferedStream.ConsumeBuffer(BufferedDataLength);
+  ConsumeBufferedData(BufferedDataLength);
 end;
 
 function BufferedStreamReader.ReadUntil(const Delimiter: string): string;
@@ -385,7 +393,7 @@ begin
 
   result := Encoding.GetString(BufferedData, 0, curIndex);
 
-  FBufferedStream.ConsumeBuffer(postDelimiterIndex);
+  ConsumeBufferedData(postDelimiterIndex);
 end;
 
 function BufferedStreamReader.ReadUntil(const Delimiter: UInt8): string;
@@ -420,7 +428,7 @@ begin
 
   result := Encoding.GetString(BufferedData, 0, curIndex);
 
-  FBufferedStream.ConsumeBuffer(postDelimiterIndex);
+  ConsumeBufferedData(postDelimiterIndex);
 end;
 
 end.
