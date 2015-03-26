@@ -1,0 +1,48 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{8BE10795-DB31-425C-B089-5342871A3403}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="BufferedStreamTest.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="Test\BufferedStreamReaderTests.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="BufferedStreamTest">
+        <MSBuild Projects="BufferedStreamTest.dproj"/>
+    </Target>
+    <Target Name="BufferedStreamTest:Clean">
+        <MSBuild Projects="BufferedStreamTest.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="BufferedStreamTest:Make">
+        <MSBuild Projects="BufferedStreamTest.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="BufferedStreamReaderTests">
+        <MSBuild Projects="Test\BufferedStreamReaderTests.dproj"/>
+    </Target>
+    <Target Name="BufferedStreamReaderTests:Clean">
+        <MSBuild Projects="Test\BufferedStreamReaderTests.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="BufferedStreamReaderTests:Make">
+        <MSBuild Projects="Test\BufferedStreamReaderTests.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="BufferedStreamTest;BufferedStreamReaderTests"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="BufferedStreamTest:Clean;BufferedStreamReaderTests:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="BufferedStreamTest:Make;BufferedStreamReaderTests:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>
