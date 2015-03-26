@@ -130,6 +130,18 @@ type
 
     /// <summary>
     ///  <para>
+    ///  Returns the next byte from the source stream
+    ///  without consuming it.
+    ///  </para>
+    ///  <para>
+    ///  If no more data can be read from the source stream, it
+    ///  returns -1.
+    ///  </para>
+    /// </summary>
+    function Peek: integer;
+
+    /// <summary>
+    ///  <para>
     ///  Encoding of the text to be read.
     ///  </para>
     /// </summary>
@@ -216,6 +228,22 @@ end;
 function BufferedStreamReader.GetStream: TStream;
 begin
   result := FBufferedStream;
+end;
+
+function BufferedStreamReader.Peek: integer;
+begin
+  result := -1;
+  FEndOfStream := False;
+
+  while (BufferedDataLength < 1) and (not FEndOfStream) do
+  begin
+    FillBufferedData;
+  end;
+
+  if (FEndOfStream) then
+    exit;
+
+  result := BufferedData^;
 end;
 
 function BufferedStreamReader.ReadChars(const CharCount: integer): TCharArray;

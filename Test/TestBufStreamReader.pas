@@ -34,6 +34,7 @@ type
     procedure TestReadUntilString;
     procedure TestReadToEnd;
     procedure TestReadStreamAfter;
+    procedure TestPeek;
   end;
 
   TestBufferedStreamReaderSmallBuffer = class(TestBufferedStreamReaderBase)
@@ -71,6 +72,36 @@ procedure TestBufferedStreamReaderBase.TearDown;
 begin
   FBufferedStreamReader.Free;
   FBufferedStreamReader := nil;
+end;
+
+procedure TestBufferedStreamReaderBase.TestPeek;
+var
+  c: Char;
+  ReturnValue: integer;
+  Src: TBytes;
+begin
+  FBufferedStreamReader.ReadLine;
+  FBufferedStreamReader.ReadLine;
+
+  Src := TEncoding.UTF8.GetBytes(FLine3);
+
+  ReturnValue := FBufferedStreamReader.Peek;
+
+  CheckEquals(Src[0], ReturnValue, 'Peek failed (1st)');
+  CheckFalse(FBufferedStreamReader.EndOfStream, 'Peek incorrectly flagged end of stream');
+
+  FBufferedStreamReader.ReadUntil('8');
+  ReturnValue := FBufferedStreamReader.Peek;
+
+  CheckEquals(Src[9], ReturnValue, 'Peek failed (2nd)');
+  CheckFalse(FBufferedStreamReader.EndOfStream, 'Peek incorrectly flagged end of stream');
+
+  c := FBufferedStreamReader.ReadChars(1)[0];
+  CheckEquals('9', c, 'ReadChars after Peek failed');
+
+  ReturnValue := FBufferedStreamReader.Peek;
+  CheckEquals(-1, ReturnValue, 'Peek failed to signal End Of Stream');
+  CheckTrue(FBufferedStreamReader.EndOfStream, 'Peek failed to flag end of stream');
 end;
 
 procedure TestBufferedStreamReaderBase.TestReadChars;
