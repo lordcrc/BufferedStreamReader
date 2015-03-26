@@ -263,6 +263,7 @@ begin
       FillBufferedData;
     end;
     result := Encoding.GetChars(BufferedData, 0, CharCount);
+    ConsumeBufferedData(CharCount);
     exit;
   end;
 
@@ -308,6 +309,7 @@ begin
     exit;
 
   result := Encoding.GetChars(BufferedData, 0, charIndex);
+  ConsumeBufferedData(charIndex);
 end;
 
 function BufferedStreamReader.ReadLine: string;
