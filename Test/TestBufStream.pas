@@ -170,12 +170,12 @@ begin
     CheckNotNull(FBufferedStream.BufferedData, 'FillBuffer failed to assign buffered data pointer');
     CheckTrue(FBufferedStream.BufferedDataLength <= 6, 'FillBuffer read too much data');
 
-    CheckTrue(ReturnValue, 'FillBuffer prematurely signaled end of source');
-
     if (FBufferedStream.BufferedDataLength = 6) then
     begin
       break;
     end;
+
+    CheckTrue(ReturnValue, 'FillBuffer prematurely signaled end of source');
   end;
 
   ReturnValue := FBufferedStream.FillBuffer;
@@ -315,5 +315,6 @@ end;
 initialization
   // Register any test cases with the test runner
   RegisterTest(TestBufferedStreamSmallBuffer.Suite);
+  RegisterTest(TestBufferedStreamLargeBuffer.Suite);
 end.
 
