@@ -194,7 +194,7 @@ end;
 
 procedure BufferedStream.DiscardBuffer;
 begin
-  FBufferedData := nil;
+  ClearBuffer;
   FPosition := SourceStream.Position;
 end;
 
