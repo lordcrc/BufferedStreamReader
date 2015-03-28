@@ -42,7 +42,7 @@
     <PropertyGroup Condition="'$(Base)'!=''">
         <DCC_Define>_CONSOLE_TESTRUNNER;TESTINSIGHT;$(DCC_Define)</DCC_Define>
         <SanitizedProjectName>BufferedStreamReaderTests</SanitizedProjectName>
-        <DCC_UnitSearchPath>$(BDS)\Source\DUnit\src;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <DCC_UnitSearchPath>$(BDS)\Source\DUnit\src;..\..\RegularExpr;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <VerInfo_Locale>1044</VerInfo_Locale>
         <Manifest_File>None</Manifest_File>
         <DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;$(DCC_Namespace)</DCC_Namespace>
@@ -74,7 +74,6 @@
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
         <VerInfo_Locale>1033</VerInfo_Locale>
-        <Manifest_File>None</Manifest_File>
         <DCC_RemoteDebug>false</DCC_RemoteDebug>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2)'!=''">
@@ -472,6 +471,7 @@
                 <TestFramework>DUnit / Delphi Win32</TestFramework>
                 <TestRunner>GUI</TestRunner>
                 <SourceProjectName>C:\Users\LordCrc\Documents\Embarcadero\Studio\Projects\BufferedStreamReader\BufferedStreamTest.dproj</SourceProjectName>
+                <TestProjectName/>
             </UnitTesting>
         </BorlandProject>
         <ProjectFileVersion>12</ProjectFileVersion>

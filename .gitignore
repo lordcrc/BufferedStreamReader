@@ -54,3 +54,4 @@ __history/
 *.~*
 TestInsightSettings.ini
 *.stat
+dunit.ini

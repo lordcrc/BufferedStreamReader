@@ -7,8 +7,8 @@ procedure ConvertPPMtoPNG(const InputFilename, OutputFilename: string);
 implementation
 
 uses
-  System.SysUtils, System.Classes, BufStream, BufStreamReader, Vcl.Imaging.pngimage,
-  System.Math;
+  System.SysUtils, System.Classes, Vcl.Imaging.pngimage, System.Math,
+  BufStream, BufStreamReader, RegularExpr;
 
 {$POINTERMATH ON}
 
@@ -23,10 +23,10 @@ type
       MaxValue: integer;
     end;
     // valid PPM header delimiters: tab, lf, cr, space
-    const HeaderDelims: array[0..3] of UInt8 = (9, 10, 13, 32);
   strict private
     FHeader: PPMHeader;
     FReader: BufferedStreamReader;
+    FHeaderDelims: RegEx;
 
     procedure VerifyMagic;
     function SkipSingleWhitespace: boolean;
@@ -71,6 +71,8 @@ begin
       [BufferedStreamReaderOwnsSource]
     );
 
+    FHeaderDelims := RegEx.Create('\s');
+
     VerifyMagic;
 
     ReadHeader;
@@ -108,7 +110,7 @@ end;
 function PPMtoPNGConverter.ReadHeaderProperty: string;
 begin
   SkipWhitespace;
-  result := Reader.ReadUntil(HeaderDelims);
+  result := Reader.ReadUntil(FHeaderDelims);
 end;
 
 procedure PPMtoPNGConverter.RunConversion(const OutputStream: TStream);
@@ -187,17 +189,20 @@ end;
 function PPMtoPNGConverter.SkipSingleWhitespace: boolean;
 var
   nextChar: integer;
+  match: RegExMatch;
 begin
   result := False;
 
   // check next character
   nextChar := Reader.Peek;
 
-  if (  (nextChar <> HeaderDelims[0])
-    and (nextChar <> HeaderDelims[1])
-    and (nextChar <> HeaderDelims[2])
-    and (nextChar <> HeaderDelims[3])
-  ) then
+  if (nextChar < 0) then
+    exit;
+
+  // check if it matches a delimiter
+  match := FHeaderDelims.Match(@nextChar, 1);
+
+  if (not match) then
     exit;
 
   // consume delimiter

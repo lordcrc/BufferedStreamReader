@@ -46,7 +46,10 @@
         <Base>true</Base>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base)'!=''">
-        <DCC_Define>TESTINSIGHT;$(DCC_Define)</DCC_Define>
+        <VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+        <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
+        <VerInfo_Locale>1044</VerInfo_Locale>
+        <DCC_Define>TESTINSIGHT;BUFFEREDSTREAMREADER_NO_REGULAREXPR;$(DCC_Define)</DCC_Define>
         <SanitizedProjectName>BufferedStreamDev</SanitizedProjectName>
         <DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;$(DCC_Namespace)</DCC_Namespace>
         <DCC_DcuOutput>.\$(Platform)\$(Config)</DCC_DcuOutput>
@@ -97,7 +100,6 @@
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
         <VerInfo_Locale>1033</VerInfo_Locale>
-        <Manifest_File>None</Manifest_File>
     </PropertyGroup>
     <ItemGroup>
         <DelphiCompile Include="$(MainSource)">

@@ -12,7 +12,11 @@
 interface
 
 uses
-  TestFramework, CustomTestCase, System.Classes, BufStreamReader, System.SysUtils, BufStream;
+  TestFramework, CustomTestCase, System.Classes, BufStreamReader, System.SysUtils,
+{$IFNDEF BUFFEREDSTREAMREADER_NO_REGULAREXPR}
+  RegularExpr,
+{$ENDIF  BUFFEREDSTREAMREADER_NO_REGULAREXPR}
+  BufStream;
 
 type
   // Test methods for class BufferedStreamReader
@@ -31,7 +35,9 @@ type
     procedure TestReadChars;
     procedure TestReadLine;
     procedure TestReadUntilByte;
-    procedure TestReadUntilMultipleBytes;
+{$IFNDEF BUFFEREDSTREAMREADER_NO_REGULAREXPR}
+    procedure TestReadUntilExpr;
+{$ENDIF  BUFFEREDSTREAMREADER_NO_REGULAREXPR}
     procedure TestReadUntilString;
     procedure TestReadToEnd;
     procedure TestReadStreamAfter;
@@ -191,49 +197,49 @@ begin
   CheckTrue(FBufferedStreamReader.EndOfStream, 'ReadUntil failed to flag end of stream');
 end;
 
-procedure TestBufferedStreamReaderBase.TestReadUntilMultipleBytes;
+{$IFNDEF BUFFEREDSTREAMREADER_NO_REGULAREXPR}
+procedure TestBufferedStreamReaderBase.TestReadUntilExpr;
 var
   ReturnValue: string;
-  Delimiter: array[0..2] of Byte;
+  Expr: RegEx;
 begin
-  Delimiter[0] := 10;
-  Delimiter[1] := 13;
-  Delimiter[2] := 1;
-  ReturnValue := FBufferedStreamReader.ReadUntil(Delimiter);
+  Expr := RegEx.Create('\n|\r|\x{01}');
+  ReturnValue := FBufferedStreamReader.ReadUntil(Expr);
 
   CheckEquals(FLine1, ReturnValue);
   CheckFalse(FBufferedStreamReader.EndOfStream, 'ReadUntil incorrectly flagged end of stream');
 
-  Delimiter[0] := 10;
-  Delimiter[1] := 2;
-  Delimiter[2] := 1;
-  ReturnValue := FBufferedStreamReader.ReadUntil(Delimiter);
+  Expr := RegEx.Create('\n|\x{02}|\x{01}');
+  ReturnValue := FBufferedStreamReader.ReadUntil(Expr);
 
   CheckEquals('', ReturnValue);
   CheckFalse(FBufferedStreamReader.EndOfStream, 'ReadUntil incorrectly flagged end of stream');
 
-  Delimiter[0] := 10;
-  Delimiter[1] := 2;
-  Delimiter[2] := 1;
-  ReturnValue := FBufferedStreamReader.ReadUntil(Delimiter);
+  Expr := RegEx.Create('\n|\x{02}|\x{01}');
+  ReturnValue := FBufferedStreamReader.ReadUntil(Expr);
 
   CheckEquals(FLine2 + #13, ReturnValue);
   CheckFalse(FBufferedStreamReader.EndOfStream, 'ReadUntil incorrectly flagged end of stream');
 
-  ReturnValue := FBufferedStreamReader.ReadUntil([Ord('5')]);
+  Expr := RegEx.Create('5');
+  ReturnValue := FBufferedStreamReader.ReadUntil(Expr);
 
   CheckEquals(FLine3.Substring(0, 5), ReturnValue);
   CheckFalse(FBufferedStreamReader.EndOfStream, 'ReadUntil incorrectly flagged end of stream');
 
-  Delimiter[0] := 3;
-  Delimiter[1] := 2;
-  Delimiter[2] := 1;
-
-  ReturnValue := FBufferedStreamReader.ReadUntil(Delimiter);
+  Expr := RegEx.Create('\x{03}|\x{02}|\x{01}');
+  ReturnValue := FBufferedStreamReader.ReadUntil(Expr);
 
   CheckEquals(FLine3.Substring(6, 4), ReturnValue);
   CheckTrue(FBufferedStreamReader.EndOfStream, 'ReadUntil failed to flag end of stream');
+
+  // check that it doesn't read past end of stream
+  ReturnValue := FBufferedStreamReader.ReadUntil(Expr);
+
+  CheckEquals('', ReturnValue);
+  CheckTrue(FBufferedStreamReader.EndOfStream, 'ReadUntil failed to flag end of stream');
 end;
+{$ENDIF  BUFFEREDSTREAMREADER_NO_REGULAREXPR}
 
 procedure TestBufferedStreamReaderBase.TestReadUntilString;
 var

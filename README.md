@@ -21,9 +21,29 @@ fill and consume the buffer. The position is tracked according to the consumed
 bytes, so reading from the `BufferedStream` does not skip buffered data.
 
 
+Dependencies
+============
+
+The `BufferedStreamReader` has a method `ReadUntil` taking a regular expression
+for matching the delimiter. This function relies on my RegularExpr[1] library,
+which is a wrapper around PCRE using Delphi's own RegularExpressionsAPI unit,
+included in XE2 and above.
+
+If you do not wish to use this dependency you can define 
+`BUFFEREDSTREAMREADER_NO_REGULAREXPR` in your project.
+
+The test and example projects assume that the BufferedStreamReader and 
+RegularExpr libraries share the same root folder, if this is not the case
+remember to adjust the search paths in the respective project options.
+
+
 Examples
 ========
 
 `ppm2png` illustrates how to first parse an ASCII header and then convert the
 binary data immediately following the header using the `BufferedStreamReader`.
-The program converts PPM (Portable PixMaps) files to PNG files.
+The program converts PPM (Portable PixMaps) files to PNG files. The example
+requires the RegularExpr dependency, as described above.
+
+
+[1]: https://github.com/lordcrc/RegularExpr

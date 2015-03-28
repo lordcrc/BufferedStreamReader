@@ -16,7 +16,11 @@ unit BufStreamReader;
 interface
 
 uses
-  System.SysUtils, System.Classes, BufStream;
+  System.SysUtils, System.Classes,
+{$IFNDEF BUFFEREDSTREAMREADER_NO_REGULAREXPR}
+  RegularExpr,
+{$ENDIF  BUFFEREDSTREAMREADER_NO_REGULAREXPR}
+  BufStream;
 
 type
   BufferedStreamReaderOption = (BufferedStreamReaderOwnsSource);
@@ -104,17 +108,24 @@ type
     /// </summary>
     function ReadUntil(const Delimiter: UInt8): string; overload;
 
+{$IFNDEF BUFFEREDSTREAMREADER_NO_REGULAREXPR}
     /// <summary>
     ///  <para>
-    ///  Reads text from the source stream until one of the delimiters
-    ///  is found or the end of the source stream is reached.
+    ///  Reads text from the source stream until the delimiter
+    ///  regular expression matches.
     ///  </para>
     ///  <para>
     ///  If no more data can be read from the source stream, it
     ///  returns an empty string.
     ///  </para>
     /// </summary>
-    function ReadUntil(const Delimiters: array of UInt8): string; overload;
+    /// <remarks>
+    ///  Using the RegExStudy option when creating the RegEx instance
+    ///  is <b>highly</b> recommended for repeated use with ReadUntil.
+    ///  This can lead to an order of magnitude increase in performance.
+    /// </remarks>
+    function ReadUntil(const DelimiterExpr: RegEx): string; overload;
+{$ENDIF  BUFFEREDSTREAMREADER_NO_REGULAREXPR}
 
     /// <summary>
     ///  <para>
@@ -381,22 +392,12 @@ begin
   ConsumeBufferedData(BufferedDataLength);
 end;
 
-function BufferedStreamReader.ReadUntil(const Delimiters: array of UInt8): string;
+{$IFNDEF BUFFEREDSTREAMREADER_NO_REGULAREXPR}
+function BufferedStreamReader.ReadUntil(const DelimiterExpr: RegEx): string;
 var
   curIndex, postDelimiterIndex: integer;
-  di, NumDelims: integer;
+  match: RegExMatch;
 begin
-  NumDelims := Length(Delimiters);
-
-  if (NumDelims = 0) then
-    raise EArgumentException.Create('No delimiter specified in BufferedStreamReader.ReadUnil');
-
-  if (NumDelims = 1) then
-  begin
-    result := ReadUntil(Delimiters[0]);
-    exit;
-  end;
-
   FEndOfStream := False;
 
   curIndex := 0;
@@ -404,35 +405,41 @@ begin
 
   while True do
   begin
-    if (curIndex + 1 > BufferedDataLength) and (not FEndOfStream) then
+    if (curIndex >= BufferedDataLength) and (not EndOfStream) then
       FillBufferedData;
 
-    if (curIndex >= BufferedDataLength) then
+    // the latter checks if FillBufferedData managed to read anything at all
+    if (BufferedDataLength <= 0) or (curIndex >= BufferedDataLength) then
+    begin
+      curIndex := 0;
+      postDelimiterIndex := 0;
+      break;
+    end;
+
+    match := DelimiterExpr.Match(BufferedData, BufferedDataLength);
+
+    if (match) then
+    begin
+      curIndex := match.Offset;
+      postDelimiterIndex := match.Offset + match.Length;
+      break;
+    end;
+
+    if (FSourceEndOfStream) then
     begin
       curIndex := BufferedDataLength;
       postDelimiterIndex := curIndex;
       break;
     end;
 
-    for di := 0 to NumDelims-1 do
-    begin
-      if (BufferedData[curIndex] = Delimiters[di]) then
-      begin
-        postDelimiterIndex := curIndex + 1;
-        break;
-      end;
-    end;
-
-    if (postDelimiterIndex >= 0) then
-      break;
-
-    curIndex := curIndex + 1;
+    curIndex := BufferedDataLength;
   end;
 
   result := Encoding.GetString(BufferedData, 0, curIndex);
 
   ConsumeBufferedData(postDelimiterIndex);
 end;
+{$ENDIF  BUFFEREDSTREAMREADER_NO_REGULAREXPR}
 
 function BufferedStreamReader.ReadUntil(const Delimiter: string): string;
 var
