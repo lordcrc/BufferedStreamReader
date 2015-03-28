@@ -25,7 +25,7 @@ Dependencies
 ============
 
 The `BufferedStreamReader` has a method `ReadUntil` taking a regular expression
-for matching the delimiter. This function relies on my RegularExpr[1] library,
+for matching the delimiter. This function relies on my [RegularExpr][1] library,
 which is a wrapper around PCRE using Delphi's own RegularExpressionsAPI unit,
 included in XE2 and above.
 
