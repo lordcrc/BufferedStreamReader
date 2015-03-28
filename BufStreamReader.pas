@@ -119,11 +119,6 @@ type
     ///  returns an empty string.
     ///  </para>
     /// </summary>
-    /// <remarks>
-    ///  Using the RegExStudy option when creating the RegEx instance
-    ///  is <b>highly</b> recommended for repeated use with ReadUntil.
-    ///  This can lead to an order of magnitude increase in performance.
-    /// </remarks>
     function ReadUntil(const DelimiterExpr: RegEx): string; overload;
 {$ENDIF  BUFFEREDSTREAMREADER_NO_REGULAREXPR}
 
